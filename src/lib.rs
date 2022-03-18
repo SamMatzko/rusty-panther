@@ -3,6 +3,7 @@
 //! examples will appear here.
 
 pub mod themes;
+pub mod traits;
 pub mod widgets;
 
 /// The struct that runs and handles everything. Will have one main window, and any
