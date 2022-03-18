@@ -1,6 +1,6 @@
-# Rusty Panther
+# Rusty Panther 🐈⚙
 
-Rusty Panther is a widget-based terminal GUI crate. It aims to make beautiful, functional terminal GUIs, while maintaing simplicity to free developers' minds to focus on more important things. The name was inspired by my black cat, who, in addition to being beautiful and prowling the house to keep watch on things, likes us to serve her such that she saves maximum effort in life.
+Rusty Panther is a widget-based terminal GUI crate. It aims to make beautiful, functional terminal GUIs, while maintaing simplicity to free developers' minds to focus on more important things. The name was inspired by my black cat, who, in addition to being beautiful 🐈, likes us to serve her such that she saves maximum effort in life.
 
 ## Not yet ready for production
 
