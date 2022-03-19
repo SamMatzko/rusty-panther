@@ -37,18 +37,14 @@ impl Theme {
 }
 impl Buildable for Theme {
 
-    /// Returns the completed [`Theme`] after all builder functions are called
     fn build(self) -> Theme {
         Theme { fg: self.fg, bg: self.bg }
     }
 
-    /// Returns a new [`Theme`], which can then be built using the builder functions
     fn builder() -> Theme {
         Theme { fg: (0, 0, 0), bg: (255, 255, 255) }
     }
 
-    /// Returns a new [`Theme`] with the default configuration. Shorthand for
-    /// `Theme::builder().build()`.
     fn new() -> Theme {
         Theme::builder().build()
     }

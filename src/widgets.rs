@@ -95,7 +95,6 @@ pub struct Label {
 }
 impl Buildable for Label {
 
-    /// Returns the completed [`Label`]; to be called after all the builder functions.
     fn build(self) -> Label {
         Label {
             border: self.border,
@@ -106,7 +105,6 @@ impl Buildable for Label {
         }
     }
 
-    /// Returns a new [`Label`], which can then be built using the builder functions.
     fn builder() -> Label {
         Label {
             border: (true, true),
@@ -117,16 +115,12 @@ impl Buildable for Label {
         }
     }
 
-    /// Returns a new [`Label`] with the default values. Shorthand for
-    /// `Label::builder().build();`.
     fn new() -> Label {
         Label::builder().build()
     }
 }
 impl Widget for Label {
 
-    /// Draw the label, at the given coordinates. This function is called by parents.
-    /// `width` is not relevant here, for now.
     fn draw(&self, x: u16, y: u16, _width: u16, height: u16) {
 
         // The positioning of the text
@@ -200,19 +194,15 @@ impl Window {
 }
 impl Buildable for Window {
 
-    /// Returns the completed [`Window`]; to be called after all the builder functions.
     fn build(self) -> Window {
         Window { stdout: self.stdout, theme: self.theme, widgets: self.widgets }
     }
 
-    /// Returns a new [`Window`], which can then be built using the builder functions.
     fn builder() -> Window {
         let out = stdout().into_raw_mode().unwrap();
         Window { stdout: out, theme: themes::default(), widgets: Vec::new() }
     }
 
-    /// Returns a new [`Window`] with the default values. Shorthand for
-    /// `Window::builder().build();`.
     fn new() -> Window {
         Window::builder().build()
     }
