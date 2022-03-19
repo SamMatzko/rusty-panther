@@ -3,7 +3,12 @@ name = "rusty-panther"
 version = "0.0.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+categories = ["terminal", "ui"]
+description = "A simple, widget-based terminal UI crate."
+documentation = "https://docs.rs/crate/rusty-panther"
+keywords = ["terminal", "tui", "ui", "widget"]
+license = "MIT"
+repository = "https://github.com/SamMatzko/rusty-panther"
 
 [dependencies]
 termion = "1.5.6"
