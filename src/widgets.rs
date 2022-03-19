@@ -95,6 +95,40 @@ pub struct Label {
     /// The width of the label, in chars
     width: u16,
 }
+impl Label {
+    // The builder functions. These can be used to optionally customize options.
+    // Be sure to call [`build()`] to finalize the creation.
+
+    /// Sets the border configuration [`bool`]s to `border`.
+    pub fn set_border(mut self, border: (bool, bool)) -> Label {
+        self.border = border;
+        self
+    }
+
+    /// Sets the stdout to `stdout`.
+    pub fn set_stdout(mut self, stdout: RawTerminal<std::io::Stdout>) -> Label {
+        self.stdout = stdout;
+        self
+    }
+
+    /// Sets the label's text to `text`.
+    pub fn set_text(mut self, text: String) -> Label {
+        self.text = text;
+        self
+    }
+
+    /// Sets the label's theme to `theme`.
+    pub fn set_theme(mut self, theme: themes::Theme) -> Label {
+        self.theme = theme;
+        self
+    }
+
+    /// Sets the label's width to `width`.
+    pub fn set_width(mut self, width: u16) -> Label {
+        self.width = width;
+        self
+    }
+}
 impl Buildable for Label {
 
     fn build(self) -> Label {
@@ -184,14 +218,25 @@ pub struct Window {
     widgets: Vec<Box<dyn Widget>>,
 }
 impl Window {
-
     // The builder functions. These can be used to optionally customize options.
     // Be sure to call [`build()`] to finalize the creation.
 
+    /// Set the stdout for this window to `stdout`.
+    pub fn set_stdout(mut self, stdout: RawTerminal<std::io::Stdout>) -> Window {
+        self.stdout = stdout;
+        self
+    }
+
     /// Set the theme for the window.
-    pub fn set_theme(&mut self, theme: themes::Theme) -> &mut Window {
+    pub fn set_theme(mut self, theme: themes::Theme) -> Window {
         self.theme = theme;
         self
+    }
+}
+impl Parent for Window {
+    fn add(&mut self, child: Box<dyn Widget>, width: u16, height: u16) {
+        self.widgets.push(child);
+        self.widgets.last_mut().unwrap().draw(1, 1, width, height);
     }
 }
 impl Buildable for Window {
