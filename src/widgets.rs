@@ -6,7 +6,6 @@ use crate::traits::*;
 use std::io::stdout;
 use termion;
 use termion::raw::{IntoRawMode, RawTerminal};
-use termion::screen::*;
 
 /// The main window for the terminal application; this contains all the widgets.
 /// Usage examples will appear here as soon as a semi-stable release comes out.
@@ -31,7 +30,6 @@ impl Buildable for Window {
     /// Returns the completed [`Window`]; to be called after all the builder functions.
     /// This function also creates the [`AlternateScreen`].
     fn build(self) -> Window {
-        AlternateScreen::from(stdout());
         Window { stdout: self.stdout, theme: self.theme, widgets: self.widgets }
     }
 
@@ -44,8 +42,6 @@ impl Buildable for Window {
     /// Returns a new [`Window`] with all the default values. Shorthand for
     /// `Window::builder().build();`.
     fn new() -> Window {
-        let out = stdout().into_raw_mode().unwrap();
-        AlternateScreen::from(stdout());
-        Window { stdout: out, theme: themes::default(), widgets: Vec::new() }
+        Window::builder().build()
     }
 }
