@@ -2,6 +2,7 @@
 //! terminal manipulation library. Once more code gets written, documentation and
 //! examples will appear here.
 
+pub mod constants;
 pub mod themes;
 pub mod traits;
 pub mod widgets;

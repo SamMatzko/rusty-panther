@@ -1,7 +1,6 @@
 //! The crate that contains all the traits, for better organization and easier use.
 
-/// The trait that implements all required functions for structs that can be built
-/// using the builder pattern syntax.
+/// The trait for all structs that can be built using the builder pattern syntax.
 pub trait Buildable {
     
     /// Returns the completed widget as part of the builder pattern.
@@ -15,9 +14,21 @@ pub trait Buildable {
     fn new() -> Self;
 }
 
-/// The trait that implements all required for widget structs.
+/// The trait for any widgets that are parents; that is, they contain child widgets.
+pub trait Parent {
+
+    /// Adds a child widget to this parent widget. Takes arguments specifying what
+    /// percetage of the window's width and height this widget should take up; these
+    /// percentages are NOT checked for validity. This means that it's possible to
+    /// have a widget that takes up 110% of the available space. May fix this in
+    /// the future.
+    fn add(&mut self, child: Box<dyn Widget>, width: u8, height: u8);
+}
+
+/// The trait for widget structs.
 pub trait Widget {
 
-    /// Draws the widget.
-    fn draw(&self);
+    /// Draws the widget, with parameters location (`x`, `y`) and size `width`×`height`.
+    /// This function is called by the parent widgets.
+    fn draw(&self, x: u16, y: u16, width: u16, height: u16);
 }
