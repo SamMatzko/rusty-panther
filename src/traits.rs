@@ -22,7 +22,7 @@ pub trait Parent {
     /// percentages are NOT checked for validity. This means that it's possible to
     /// have a widget that takes up 110% of the available space. May fix this in
     /// the future.
-    fn add(&mut self, child: Box<dyn Widget>, width: u8, height: u8);
+    fn add(&mut self, child: Box<dyn Widget>, width: u16, height: u16);
 }
 
 /// The trait for widget structs.

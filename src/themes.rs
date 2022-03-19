@@ -14,13 +14,13 @@ impl Theme {
     // being required. `build()` must be called at the end to finalize the construction.
 
     /// Set the background color to the RGB value `bg` of type [`(u8, u8, u8)`].
-    pub fn bg_rgb(&mut self, bg: (u8, u8, u8)) -> &mut Theme {
+    pub fn bg_rgb(mut self, bg: (u8, u8, u8)) -> Theme {
         self.bg = bg;
         self
     }
 
     /// Set the foreground color to the RGB value `fg` of type [`(u8, u8, u8)`].
-    pub fn fg_rgb(&mut self, fg: (u8, u8, u8)) -> &mut Theme {
+    pub fn fg_rgb(mut self, fg: (u8, u8, u8)) -> Theme {
         self.fg = fg;
         self
     }
