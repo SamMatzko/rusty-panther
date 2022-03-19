@@ -30,5 +30,5 @@ pub trait Widget {
 
     /// Draws the widget, with parameters location (`x`, `y`) and size `width`×`height`.
     /// This function is called by the parent widgets.
-    fn draw(&self, x: u16, y: u16, width: u16, height: u16);
+    fn draw(&mut self, x: u16, y: u16, width: u16, height: u16);
 }

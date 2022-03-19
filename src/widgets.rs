@@ -66,6 +66,8 @@ fn create_border_box(x: u16, y: u16, width: u16, height: u16, fg: Rgb, bg: Rgb) 
 /// A function that creates a filled, borderless box
 fn create_fill_box(x: u16, y: u16, width: u16, height: u16, bg: Rgb) {
 
+    let mut stdout = stdout().into_raw_mode().unwrap();
+
     // Simply write the color to each row
     for h in 0..height {
         write!(
@@ -73,7 +75,7 @@ fn create_fill_box(x: u16, y: u16, width: u16, height: u16, bg: Rgb) {
             "{}{}{}",
             cursor::Goto(x, y + h),
             Bg(bg),
-            chars::EMPTY.repeat(x as usize)
+            chars::EMPTY.repeat(width as usize)
         ).unwrap();
     }
 }
@@ -121,7 +123,7 @@ impl Buildable for Label {
 }
 impl Widget for Label {
 
-    fn draw(&self, x: u16, y: u16, _width: u16, height: u16) {
+    fn draw(&mut self, x: u16, y: u16, _width: u16, height: u16) {
 
         // The positioning of the text
         let mut text_x: u16 = x;
