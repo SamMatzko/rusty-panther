@@ -5,6 +5,8 @@ use rusty_panther::widgets::{Label, Window};
 #[test]
 /// Creates a new [`Application`], with a [`Window`] that has a [`Label`].
 fn user_interaction() {
+
+    rusty_panther::blah();
     
     // Create the window and its label
     let mut window = Window::new();

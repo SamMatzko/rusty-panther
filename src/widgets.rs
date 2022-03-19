@@ -77,6 +77,8 @@ fn create_fill_box(x: u16, y: u16, width: u16, height: u16, bg: Rgb) {
             Bg(bg),
             chars::EMPTY.repeat(width as usize)
         ).unwrap();
+        
+    stdout.flush().unwrap();
     }
 }
 
@@ -202,6 +204,8 @@ impl Widget for Label {
             &self.text,
             Fg(Reset)
         ).unwrap();
+
+        self.stdout.flush().unwrap();
     }
 }
 

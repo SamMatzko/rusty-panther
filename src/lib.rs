@@ -15,6 +15,12 @@ use termion::screen::*;
 
 use traits::Buildable;
 
+pub fn blah() {
+    // Create the screen
+    let mut screen = AlternateScreen::from(stdout());
+    screen.flush().unwrap();
+}
+
 /// The `prelude` module for `rusty_panther`; contains all the necessary traits.
 pub mod prelude {
     pub use crate::traits::*;
@@ -28,11 +34,7 @@ pub struct Application {
 impl Application {
 
     /// Run the application; this creates the screen and starts the event listener.
-    pub fn run(&self) {
-
-        // Create the screen
-        let mut screen = AlternateScreen::from(stdout());
-        screen.flush().unwrap();        
+    pub fn run(&self) {       
 
         // Start the event listener
         for c in stdin().keys() {
@@ -59,6 +61,7 @@ impl Buildable for Application {
     }
 
     fn builder() -> Application {
+
         Application { window: widgets::Window::new() }
     }
 
