@@ -138,12 +138,13 @@ impl Label {
 impl Buildable for Label {
 
     fn build(self) -> Label {
+        let len: u16 = (self.text.len() as u16)+1;
         Label {
             border: self.border,
             stdout: self.stdout,
             text: self.text,
             theme: self.theme,
-            width: self.width
+            width: len,
         }
     }
 
@@ -163,7 +164,7 @@ impl Buildable for Label {
 }
 impl Widget for Label {
 
-    fn draw(&mut self, x: u16, y: u16, _width: u16, height: u16) {
+    fn draw(&mut self, x: u16, y: u16, _width: u16, _height: u16) {
 
         // The positioning of the text
         let mut text_x: u16 = x;
@@ -182,7 +183,7 @@ impl Widget for Label {
                 x,
                 y,
                 self.width + 1,
-                height + 2,
+                3,
                 self.theme.get_fg_rgb(),
                 self.theme.get_bg_rgb()
             );
@@ -194,7 +195,7 @@ impl Widget for Label {
                 x,
                 y,
                 self.width,
-                height,
+                1,
                 self.theme.get_bg_rgb()
             );
         }
@@ -283,8 +284,10 @@ impl<'a> Buildable for Window<'a> {
     }
 }
 impl<'a> Parent<'a> for Window<'a> {
-    fn add(&mut self, child: Box<&'a mut dyn Widget>, width: u16, height: u16) {
+    fn add(&mut self, child: Box<&'a mut dyn Widget>, x: u16, y: u16) {
         self.widgets.push(child);
-        self.widgets.last_mut().unwrap().draw(1, 1, width, height);
+        self.widgets.last_mut().unwrap().draw(x, y, 0, 0);
+        write!(self.stdout, "{}", cursor::Goto(1, 1)).unwrap();
+        self.stdout.flush().unwrap();
     }
 }

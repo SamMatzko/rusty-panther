@@ -42,7 +42,7 @@ impl Buildable for Theme {
     }
 
     fn builder() -> Theme {
-        Theme { fg: (0, 0, 0), bg: (255, 255, 255) }
+        Theme { fg: (255, 255, 255), bg: (0, 0, 0) }
     }
 
     fn new() -> Theme {
