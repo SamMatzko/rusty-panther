@@ -9,15 +9,18 @@ fn user_interaction() {
     let mut window = Window::new();
 
     let mut label1 = Label::builder()
-        .set_border((false, false))
-        .set_text(String::from("This is text."))
+        .border((false, false))
+        .text(String::from("This is text."))
         .build();
     let mut label2 = Label::builder()
-        .set_text(String::from("This is text."))
+        .text(String::from("This is text."))
         .build();
     window.add(Box::new(&mut label1), 1, 1);
     window.add(Box::new(&mut label2), 10, 10);
 
-    // Run the app
-    window.run();
+    // Run the app (uncomment if you want to have to hit Ctrl+C to continue testing)
+    // window.run();
+
+    // This makes sure we don't mess up anything in the terminal while testing
+    window.quit();
 }

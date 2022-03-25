@@ -86,17 +86,37 @@ fn create_fill_box(x: u16, y: u16, width: u16, height: u16, bg: Rgb) {
 }
 
 /// A simple label widget for displaying text.
+/// 
+/// Example:
+/// 
+/// ```ignore
+/// use rusty_panther::prelude::*;
+/// use rusty_panther::widgets::*;
+/// 
+/// fn main() {
+/// 
+///     // Create the window
+///     let mut window = Window::new();
+///
+///     // Create the label
+///     let mut label = Label::builder()
+///         .text(String::from("This is text right here."))
+///         .build();
+///     window.add(Box::new(&mut label), 1, 1);
+///     window.run();
+/// }
+/// ```
 pub struct Label {
     /// A tuple containg two [`bool`]s; whether there is a border, and whether to
     /// show the border
-    border: (bool, bool),
-    /// The stdout to which all the widgets are printed.
+    border_: (bool, bool),
+    /// The stdout to which all the widgets are printed (not very effective at the
+    /// moment; there's no guarantee that all widgets will be printed to this stdout)
     stdout: RawTerminal<std::io::Stdout>,
     /// The text that the label contains
-    text: String,
+    text_: String,
     /// The [`themes::Theme`] that this label uses for it's colors
-    theme: themes::Theme,
-    /// The theme that this label uses. Can be overriden by 
+    theme_: themes::Theme,
     /// The width of the label, in chars
     width: u16,
 }
@@ -104,9 +124,19 @@ impl Label {
     // The builder functions. These can be used to optionally customize options.
     // Be sure to call [`build()`] to finalize the creation.
 
-    /// Sets the border configuration [`bool`]s to `border`.
-    pub fn set_border(mut self, border: (bool, bool)) -> Label {
-        self.border = border;
+    /// Sets the border configuration [`bool`]s to `border`. `border` is tuple
+    /// containg two [`bool`]s; whether there is a border, and whether to show
+    /// the border. Use when building the label.
+    /// 
+    /// For example:
+    /// 
+    /// ```ignore
+    /// let label = Label::builder()
+    ///     .border((true, false))
+    ///     .build();
+    /// ```
+    pub fn border(mut self, border: (bool, bool)) -> Label {
+        self.border_ = border;
         self
     }
 
@@ -117,19 +147,43 @@ impl Label {
     //     self
     // }
 
-    /// Sets the label's text to `text`.
-    pub fn set_text(mut self, text: String) -> Label {
-        self.text = text;
+    /// Sets the label's text to `text`, a [`String`]. Use when building the label.
+    /// 
+    /// For example:
+    /// 
+    /// ```ignore
+    /// let label = Label::builder()
+    ///     .text(String::from("This is text."))
+    ///     .build();
+    /// ```
+    pub fn text(mut self, text: String) -> Label {
+        self.text_ = text;
         self
     }
 
-    /// Sets the label's theme to `theme`.
+    /// Sets the label's theme to `theme`, a [`themes::Theme`]. Use when building the label.
+    /// 
+    /// For example:
+    /// 
+    /// ```ignore
+    /// let label = Label::builder()
+    ///     .theme(themes::default())
+    ///     .build();
+    /// ```
     pub fn set_theme(mut self, theme: themes::Theme) -> Label {
-        self.theme = theme;
+        self.theme_ = theme;
         self
     }
 
-    /// Sets the label's width to `width`.
+    /// Sets the label's width to `width`, a [`u16`]. Use when building the label.
+    /// 
+    /// For example:
+    /// 
+    /// ```ignore
+    /// let label = Label::builder()
+    ///     .width(3)
+    ///     .build();
+    /// ```
     pub fn set_width(mut self, width: u16) -> Label {
         self.width = width;
         self
@@ -138,22 +192,22 @@ impl Label {
 impl Buildable for Label {
 
     fn build(self) -> Label {
-        let len: u16 = (self.text.len() as u16)+1;
+        let len: u16 = (self.text_.len() as u16)+1;
         Label {
-            border: self.border,
+            border_: self.border_,
             stdout: self.stdout,
-            text: self.text,
-            theme: self.theme,
+            text_: self.text_,
+            theme_: self.theme_,
             width: len,
         }
     }
 
     fn builder() -> Label {
         Label {
-            border: (true, true),
+            border_: (true, true),
             stdout: stdout().into_raw_mode().unwrap(),
-            text: String::from(""),
-            theme: themes::default(),
+            text_: String::from(""),
+            theme_: themes::default(),
             width: 10
         }
     }
@@ -172,7 +226,7 @@ impl Widget for Label {
 
         // Create the background box, and if there needs to be a border, create
         // the border.
-        if self.border.0 {
+        if self.border_.0 {
 
             // Make sure the text doesn't end up on the border
             text_x += 1;
@@ -184,8 +238,8 @@ impl Widget for Label {
                 y,
                 self.width + 1,
                 3,
-                self.theme.get_fg_rgb(),
-                self.theme.get_bg_rgb()
+                self.theme_.get_fg_rgb(),
+                self.theme_.get_bg_rgb()
             );
         }
         else {
@@ -196,7 +250,7 @@ impl Widget for Label {
                 y,
                 self.width,
                 1,
-                self.theme.get_bg_rgb()
+                self.theme_.get_bg_rgb()
             );
         }
 
@@ -205,8 +259,8 @@ impl Widget for Label {
             self.stdout,
             "{}{}{}{}",
             cursor::Goto(text_x, text_y),
-            Fg(self.theme.get_fg_rgb()),
-            &self.text,
+            Fg(self.theme_.get_fg_rgb()),
+            &self.text_,
             Fg(Reset)
         ).unwrap();
 
@@ -216,25 +270,39 @@ impl Widget for Label {
 
 /// The main window for the terminal application; this contains all the widgets.
 /// Usage examples will appear here as soon as a semi-stable release comes out.
+/// 
+/// Example:
+/// 
+/// ```ignore
+/// use rusty_panther::prelude::*;
+/// 
+/// fn main() {
+///     
+///     // The window
+///     let mut window = widgets::Window:new();
+///     window.run();
+/// }
+/// ```
 pub struct Window<'a> {
-    /// The stdout to which all the widgets are printed.
-    stdout: RawTerminal<std::io::Stdout>,
-    /// The [`themes::Theme`] that the window uses. Can be overridden by theme-changing
-    /// builder functions.
-    theme: themes::Theme,
     /// All the immediate children of this widget (e.g., excludes grandchildren, 
     /// great-grandchildren, etc.)
-    widgets: Vec<Box<&'a mut dyn Widget>>,
+    children: Vec<Box<&'a mut dyn Widget>>,
+    /// The stdout to which all the widgets are printed.
+    stdout: RawTerminal<std::io::Stdout>,
+    /// The [`themes::Theme`] that the window uses.
+    theme_: themes::Theme,
 }
 impl<'a> Window<'a> {
 
-    /// Quits the window.
+    /// Quits the window and the alternate screen.
     pub fn quit(&mut self) {
         write!(self.stdout, "{}", ToMainScreen).unwrap();
         self.stdout.flush().unwrap();
     }
 
     /// Run the application; this creates the screen and starts the event listener.
+    /// 
+    /// More information on connection to events will appear here when implemented.
     pub fn run(&mut self) {
         
         // Start the event listener
@@ -260,23 +328,31 @@ impl<'a> Window<'a> {
     //     self
     // }
 
-    /// Set the theme for the window.
-    pub fn set_theme(mut self, theme: themes::Theme) -> Window<'a> {
-        self.theme = theme;
+    /// Set the theme for the window. Use when building the window.
+    /// 
+    /// For example:
+    /// 
+    /// ```ignore
+    /// let window = Window::builder()
+    ///     .theme(themes::default())
+    ///     .build();
+    /// ```
+    pub fn theme(mut self, theme: themes::Theme) -> Window<'a> {
+        self.theme_ = theme;
         self
     }
 }
 impl<'a> Buildable for Window<'a> {
 
     fn build(self) -> Window<'a> {
-        Window { stdout: self.stdout, theme: self.theme, widgets: self.widgets }
+        Window { children: self.children, stdout: self.stdout, theme_: self.theme_ }
     }
 
     fn builder() -> Window<'a> {
         let mut out = stdout().into_raw_mode().unwrap();
         write!(out, "{}", ToAlternateScreen).unwrap();
         out.flush().unwrap();
-        Window { stdout: out, theme: themes::default(), widgets: Vec::new() }
+        Window { children: Vec::new(), stdout: out, theme_: themes::default() }
     }
 
     fn new() -> Window<'a> {
@@ -285,8 +361,8 @@ impl<'a> Buildable for Window<'a> {
 }
 impl<'a> Parent<'a> for Window<'a> {
     fn add(&mut self, child: Box<&'a mut dyn Widget>, x: u16, y: u16) {
-        self.widgets.push(child);
-        self.widgets.last_mut().unwrap().draw(x, y, 0, 0);
+        self.children.push(child);
+        self.children.last_mut().unwrap().draw(x, y, 0, 0);
         write!(self.stdout, "{}", cursor::Goto(1, 1)).unwrap();
         self.stdout.flush().unwrap();
     }
