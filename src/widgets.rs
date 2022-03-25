@@ -215,7 +215,7 @@ impl Widget for Label {
 
 /// The main window for the terminal application; this contains all the widgets.
 /// Usage examples will appear here as soon as a semi-stable release comes out.
-pub struct Window {
+pub struct Window<'a> {
     /// The stdout to which all the widgets are printed.
     stdout: RawTerminal<std::io::Stdout>,
     /// The [`themes::Theme`] that the window uses. Can be overridden by theme-changing
@@ -223,9 +223,9 @@ pub struct Window {
     theme: themes::Theme,
     /// All the immediate children of this widget (e.g., excludes grandchildren, 
     /// great-grandchildren, etc.)
-    widgets: Vec<Box<dyn Widget>>,
+    widgets: Vec<Box<&'a mut dyn Widget>>,
 }
-impl Window {
+impl<'a> Window<'a> {
 
     /// Quits the window.
     pub fn quit(&mut self) {
@@ -260,30 +260,30 @@ impl Window {
     // }
 
     /// Set the theme for the window.
-    pub fn set_theme(mut self, theme: themes::Theme) -> Window {
+    pub fn set_theme(mut self, theme: themes::Theme) -> Window<'a> {
         self.theme = theme;
         self
     }
 }
-impl Buildable for Window {
+impl<'a> Buildable for Window<'a> {
 
-    fn build(self) -> Window {
+    fn build(self) -> Window<'a> {
         Window { stdout: self.stdout, theme: self.theme, widgets: self.widgets }
     }
 
-    fn builder() -> Window {
+    fn builder() -> Window<'a> {
         let mut out = stdout().into_raw_mode().unwrap();
         write!(out, "{}", ToAlternateScreen).unwrap();
         out.flush().unwrap();
         Window { stdout: out, theme: themes::default(), widgets: Vec::new() }
     }
 
-    fn new() -> Window {
+    fn new() -> Window<'a> {
         Window::builder().build()
     }
 }
-impl Parent for Window {
-    fn add(&mut self, child: Box<dyn Widget>, width: u16, height: u16) {
+impl<'a> Parent<'a> for Window<'a> {
+    fn add(&mut self, child: Box<&'a mut dyn Widget>, width: u16, height: u16) {
         self.widgets.push(child);
         self.widgets.last_mut().unwrap().draw(1, 1, width, height);
     }
