@@ -4,12 +4,15 @@ use crate::constants::chars;
 use crate::themes;
 use crate::traits::*;
 
-use std::io::{stdout, Write};
+use std::io::{stdout, stdin, Write};
 
 use termion;
 use termion::color::{Bg, Fg, Reset, Rgb};
 use termion::cursor;
+use termion::event::Key;
+use termion::input::TermRead;
 use termion::raw::{IntoRawMode, RawTerminal};
+use termion::screen::*;
 
 /// A function that creates a border box
 fn create_border_box(x: u16, y: u16, width: u16, height: u16, fg: Rgb, bg: Rgb) {
@@ -107,11 +110,12 @@ impl Label {
         self
     }
 
-    /// Sets the stdout to `stdout`.
-    pub fn set_stdout(mut self, stdout: RawTerminal<std::io::Stdout>) -> Label {
-        self.stdout = stdout;
-        self
-    }
+    // TODO
+    // /// Sets the stdout to `stdout`.
+    // pub fn set_stdout(mut self, stdout: RawTerminal<std::io::Stdout>) -> Label {
+    //     self.stdout = stdout;
+    //     self
+    // }
 
     /// Sets the label's text to `text`.
     pub fn set_text(mut self, text: String) -> Label {
@@ -222,25 +226,43 @@ pub struct Window {
     widgets: Vec<Box<dyn Widget>>,
 }
 impl Window {
+
+    /// Quits the window.
+    pub fn quit(&mut self) {
+        write!(self.stdout, "{}", ToMainScreen).unwrap();
+        self.stdout.flush().unwrap();
+    }
+
+    /// Run the application; this creates the screen and starts the event listener.
+    pub fn run(&mut self) {
+        
+        // Start the event listener
+        for c in stdin().keys() {
+            match c.unwrap() {
+                Key::Ctrl('c') => {
+                    self.quit();
+                    return;
+                },
+                _ => {}
+            }
+            self.stdout.flush().unwrap();
+        }
+    }
+    
     // The builder functions. These can be used to optionally customize options.
     // Be sure to call [`build()`] to finalize the creation.
 
-    /// Set the stdout for this window to `stdout`.
-    pub fn set_stdout(mut self, stdout: RawTerminal<std::io::Stdout>) -> Window {
-        self.stdout = stdout;
-        self
-    }
+    // TODO
+    // /// Set the stdout for this window to `stdout`.
+    // pub fn set_stdout(mut self, stdout: RawTerminal<std::io::Stdout>) -> Window {
+    //     self.stdout = stdout;
+    //     self
+    // }
 
     /// Set the theme for the window.
     pub fn set_theme(mut self, theme: themes::Theme) -> Window {
         self.theme = theme;
         self
-    }
-}
-impl Parent for Window {
-    fn add(&mut self, child: Box<dyn Widget>, width: u16, height: u16) {
-        self.widgets.push(child);
-        self.widgets.last_mut().unwrap().draw(1, 1, width, height);
     }
 }
 impl Buildable for Window {
@@ -250,11 +272,19 @@ impl Buildable for Window {
     }
 
     fn builder() -> Window {
-        let out = stdout().into_raw_mode().unwrap();
+        let mut out = stdout().into_raw_mode().unwrap();
+        write!(out, "{}", ToAlternateScreen).unwrap();
+        out.flush().unwrap();
         Window { stdout: out, theme: themes::default(), widgets: Vec::new() }
     }
 
     fn new() -> Window {
         Window::builder().build()
+    }
+}
+impl Parent for Window {
+    fn add(&mut self, child: Box<dyn Widget>, width: u16, height: u16) {
+        self.widgets.push(child);
+        self.widgets.last_mut().unwrap().draw(1, 1, width, height);
     }
 }
