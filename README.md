@@ -8,4 +8,4 @@ This crate is not ready to be used in production yet, but keep an eye out; I'll 
 
 ## Dependencies
 
-This crate (so far) has only one dependency: [Termion](https://github.com/redox-os/termion).
+This crate (so far) has only one dependency: [Crossterm](https://github.com/crossterm-rs/crossterm).
