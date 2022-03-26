@@ -7,10 +7,9 @@ use crate::traits::*;
 use crossterm::{cursor, execute};
 use crossterm::event::*;
 use crossterm::style::{Color, Print, ResetColor, SetBackgroundColor, SetForegroundColor};
-use crossterm::terminal::{EnterAlternateScreen, LeaveAlternateScreen};
+use crossterm::terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen};
 
 use std::io::{stdout, Write};
-use std::time::Duration;
 
 /// A function that creates a border box
 fn create_border_box(x: u16, y: u16, width: u16, height: u16, fg: Color, bg: Color) {
@@ -281,32 +280,27 @@ impl<'a> Window<'a> {
     /// Quits the window and the alternate screen.
     pub fn quit(&mut self) {
         execute!(self.stdout, LeaveAlternateScreen).unwrap();
+        disable_raw_mode().unwrap();
     }
 
-    /// Run the application; this creates the screen and starts the event listener.
+    /// Run the application; this starts the event listener.
     /// 
     /// More information on connection to events will appear here when implemented.
     pub fn run(&mut self) {
 
         // Start the event listener
         loop {
-            // `poll()` waits for an `Event` for a given time period
-            if poll(Duration::from_millis(500)).unwrap() {
-                // It's guaranteed that the `read()` won't block when the `poll()`
-                // function returns `true`
-                match read().unwrap() {
-                    Event::Key(
-                        KeyEvent { code: KeyCode::Char('c'), modifiers: KeyModifiers::CONTROL }
-                    ) => {
-                        execute!(self.stdout, LeaveAlternateScreen).unwrap();
-                        return;
-                    },
-                    Event::Resize(width, height) => println!("New size {}x{}", width, height),
-                    Event::Key(_) => {},
-                    Event::Mouse(_) => {}
-                }
+            match read().unwrap() {
+                Event::Key(
+                    KeyEvent { code: KeyCode::Char('c'), modifiers: KeyModifiers::CONTROL }
+                ) => {
+                    self.quit();
+                    return;
+                },
+                Event::Key(_) => {},
+                Event::Mouse(_) => {}
+                Event::Resize(width, height) => println!("New size {}x{}", width, height),
             }
-            self.stdout.flush().unwrap();
         }
     }
     
@@ -341,6 +335,7 @@ impl<'a> Buildable for Window<'a> {
     }
 
     fn builder() -> Window<'a> {
+        enable_raw_mode().unwrap();
         execute!(stdout(), EnterAlternateScreen).unwrap();
         Window { children: Vec::new(), stdout: stdout(), theme_: themes::default() }
     }

@@ -19,8 +19,8 @@ fn user_interaction() {
     window.add(Box::new(&mut label2), 10, 10);
 
     // Run the app (uncomment if you want to have to hit Ctrl+C to continue testing)
-    window.run();
+    // window.run();
 
     // This makes sure we don't mess up anything in the terminal while testing
-    // window.quit();
+    window.quit();
 }
