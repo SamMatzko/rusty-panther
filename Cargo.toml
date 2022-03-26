@@ -11,4 +11,4 @@ license = "MIT"
 repository = "https://github.com/SamMatzko/rusty-panther"
 
 [dependencies]
-termion = "1.5.6"
+crossterm = "0.23.1"

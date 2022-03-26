@@ -1,8 +1,7 @@
 //! The module that contains all the theme-related structs and functions.
 
 use crate::traits::Buildable;
-
-use termion::color::Rgb;
+use crossterm::style::Color;
 
 pub struct Theme {
     pub fg: (u8, u8, u8),
@@ -26,13 +25,13 @@ impl Theme {
     }
 
     /// Get the background color of this theme as an [`Rgb`]
-    pub fn get_bg_rgb(&self) -> Rgb {
-        Rgb(self.bg.0, self.bg.1, self.bg.2)
+    pub fn get_bg_rgb(&self) -> Color {
+        Color::Rgb { r: self.bg.0, g: self.bg.1, b: self.bg.2 }
     }
 
     /// Get the foreground color of this theme as an [`Rgb`].
-    pub fn get_fg_rgb(&self) -> Rgb {
-        Rgb(self.fg.0, self.fg.1, self.fg.2)
+    pub fn get_fg_rgb(&self) -> Color {
+        Color::Rgb { r: self.fg.0, g: self.fg.1, b: self.fg.2 }
     }
 }
 impl Buildable for Theme {

@@ -4,84 +4,71 @@ use crate::constants::chars;
 use crate::themes;
 use crate::traits::*;
 
-use std::io::{stdout, stdin, Write};
+use crossterm::{cursor, execute};
+use crossterm::event::*;
+use crossterm::style::{Color, Print, ResetColor, SetBackgroundColor, SetForegroundColor};
+use crossterm::terminal::{EnterAlternateScreen, LeaveAlternateScreen};
 
-use termion;
-use termion::color::{Bg, Fg, Reset, Rgb};
-use termion::cursor;
-use termion::event::Key;
-use termion::input::TermRead;
-use termion::raw::{IntoRawMode, RawTerminal};
-use termion::screen::*;
+use std::io::{stdout, Write};
+use std::time::Duration;
 
 /// A function that creates a border box
-fn create_border_box(x: u16, y: u16, width: u16, height: u16, fg: Rgb, bg: Rgb) {
+fn create_border_box(x: u16, y: u16, width: u16, height: u16, fg: Color, bg: Color) {
     
-    let mut stdout = stdout().into_raw_mode().unwrap();
-    
+    let mut stdout = stdout();
+
     // Create the top of the box
-    write!(
+    execute!(
         stdout,
-        "{}{}{}{}{}{}{}{}",
-        cursor::Goto(x, y),
-        Fg(fg),
-        Bg(bg),
-        chars::TOP_LEFT,
-        chars::HORIZONTAL.repeat((width - 2) as usize),
-        chars::TOP_RIGHT,
-        Fg(Reset),
-        Bg(Reset)
+        cursor::MoveTo(x, y),
+        SetForegroundColor(fg),
+        SetBackgroundColor(bg),
+        Print(chars::TOP_LEFT),
+        Print(chars::HORIZONTAL.repeat((width - 2) as usize)),
+        Print(chars::TOP_RIGHT),
+        ResetColor
     ).unwrap();
 
     // Create all the sides
     for i in 0..(height - 2) {
-        write!(
+        execute!(
             stdout,
-            "{}{}{}{}{}{}{}{}",
-            cursor::Goto(x, y + (i + 1)),
-            Fg(fg),
-            Bg(bg),
-            chars::VERTICAL,
-            chars::EMPTY.repeat((width - 2) as usize),
-            chars::VERTICAL,
-            Fg(Reset),
-            Bg(Reset)
+            cursor::MoveTo(x, y + (i + 1)),
+            SetForegroundColor(fg),
+            SetBackgroundColor(bg),
+            Print(chars::VERTICAL),
+            Print(chars::EMPTY.repeat((width - 2) as usize)),
+            Print(chars::VERTICAL),
+            ResetColor
         ).unwrap();
     }
 
     // Create the bottom of the box
-    write!(
+    execute!(
         stdout,
-        "{}{}{}{}{}{}{}{}",
-        cursor::Goto(x, y + height - 1),
-        Fg(fg),
-        Bg(bg),
-        chars::BOTTOM_LEFT,
-        chars::HORIZONTAL.repeat((width - 2) as usize),
-        chars::BOTTOM_RIGHT,
-        Fg(Reset),
-        Bg(Reset)
+        cursor::MoveTo(x, y + height - 1),
+        SetForegroundColor(fg),
+        SetBackgroundColor(bg),
+        Print(chars::BOTTOM_LEFT),
+        Print(chars::HORIZONTAL.repeat((width - 2) as usize)),
+        Print(chars::BOTTOM_RIGHT),
+        ResetColor
     ).unwrap();
-
-    stdout.flush().unwrap();
 }
 
 /// A function that creates a filled, borderless box
-fn create_fill_box(x: u16, y: u16, width: u16, height: u16, bg: Rgb) {
+fn create_fill_box(x: u16, y: u16, width: u16, height: u16, bg: Color) {
 
-    let mut stdout = stdout().into_raw_mode().unwrap();
+    let mut stdout = stdout();
 
     // Simply write the color to each row
     for h in 0..height {
-        write!(
+        execute!(
             stdout,
-            "{}{}{}",
-            cursor::Goto(x, y + h),
-            Bg(bg),
-            chars::EMPTY.repeat(width as usize)
+            cursor::MoveTo(x, y + h),
+            SetBackgroundColor(bg),
+            Print(chars::EMPTY.repeat(width as usize))
         ).unwrap();
-        
-    stdout.flush().unwrap();
     }
 }
 
@@ -112,7 +99,7 @@ pub struct Label {
     border_: (bool, bool),
     /// The stdout to which all the widgets are printed (not very effective at the
     /// moment; there's no guarantee that all widgets will be printed to this stdout)
-    stdout: RawTerminal<std::io::Stdout>,
+    stdout: std::io::Stdout,
     /// The text that the label contains
     text_: String,
     /// The [`themes::Theme`] that this label uses for it's colors
@@ -205,7 +192,7 @@ impl Buildable for Label {
     fn builder() -> Label {
         Label {
             border_: (true, true),
-            stdout: stdout().into_raw_mode().unwrap(),
+            stdout: stdout(),
             text_: String::from(""),
             theme_: themes::default(),
             width: 10
@@ -255,16 +242,13 @@ impl Widget for Label {
         }
 
         // Create the label's text
-        write!(
+        execute!(
             self.stdout,
-            "{}{}{}{}",
-            cursor::Goto(text_x, text_y),
-            Fg(self.theme_.get_fg_rgb()),
-            &self.text_,
-            Fg(Reset)
+            cursor::MoveTo(text_x, text_y),
+            SetForegroundColor(self.theme_.get_fg_rgb()),
+            Print(&self.text_),
+            ResetColor
         ).unwrap();
-
-        self.stdout.flush().unwrap();
     }
 }
 
@@ -288,7 +272,7 @@ pub struct Window<'a> {
     /// great-grandchildren, etc.)
     children: Vec<Box<&'a mut dyn Widget>>,
     /// The stdout to which all the widgets are printed.
-    stdout: RawTerminal<std::io::Stdout>,
+    stdout: std::io::Stdout,
     /// The [`themes::Theme`] that the window uses.
     theme_: themes::Theme,
 }
@@ -296,23 +280,31 @@ impl<'a> Window<'a> {
 
     /// Quits the window and the alternate screen.
     pub fn quit(&mut self) {
-        write!(self.stdout, "{}", ToMainScreen).unwrap();
-        self.stdout.flush().unwrap();
+        execute!(self.stdout, LeaveAlternateScreen).unwrap();
     }
 
     /// Run the application; this creates the screen and starts the event listener.
     /// 
     /// More information on connection to events will appear here when implemented.
     pub fn run(&mut self) {
-        
+
         // Start the event listener
-        for c in stdin().keys() {
-            match c.unwrap() {
-                Key::Ctrl('c') => {
-                    self.quit();
-                    return;
-                },
-                _ => {}
+        loop {
+            // `poll()` waits for an `Event` for a given time period
+            if poll(Duration::from_millis(500)).unwrap() {
+                // It's guaranteed that the `read()` won't block when the `poll()`
+                // function returns `true`
+                match read().unwrap() {
+                    Event::Key(
+                        KeyEvent { code: KeyCode::Char('c'), modifiers: KeyModifiers::CONTROL }
+                    ) => {
+                        execute!(self.stdout, LeaveAlternateScreen).unwrap();
+                        return;
+                    },
+                    Event::Resize(width, height) => println!("New size {}x{}", width, height),
+                    Event::Key(_) => {},
+                    Event::Mouse(_) => {}
+                }
             }
             self.stdout.flush().unwrap();
         }
@@ -349,10 +341,8 @@ impl<'a> Buildable for Window<'a> {
     }
 
     fn builder() -> Window<'a> {
-        let mut out = stdout().into_raw_mode().unwrap();
-        write!(out, "{}", ToAlternateScreen).unwrap();
-        out.flush().unwrap();
-        Window { children: Vec::new(), stdout: out, theme_: themes::default() }
+        execute!(stdout(), EnterAlternateScreen).unwrap();
+        Window { children: Vec::new(), stdout: stdout(), theme_: themes::default() }
     }
 
     fn new() -> Window<'a> {
@@ -363,7 +353,7 @@ impl<'a> Parent<'a> for Window<'a> {
     fn add(&mut self, child: Box<&'a mut dyn Widget>, x: u16, y: u16) {
         self.children.push(child);
         self.children.last_mut().unwrap().draw(x, y, 0, 0);
-        write!(self.stdout, "{}", cursor::Goto(1, 1)).unwrap();
+        execute!(self.stdout, cursor::MoveTo(1, 1)).unwrap();
         self.stdout.flush().unwrap();
     }
 }
