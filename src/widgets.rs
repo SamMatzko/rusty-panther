@@ -270,6 +270,14 @@ pub struct Window<'a> {
     /// All the immediate children of this widget (e.g., excludes grandchildren, 
     /// great-grandchildren, etc.)
     children: Vec<Box<&'a mut dyn Widget>>,
+    /// The height of the window's grid
+    gridh: u16,
+    /// The percentage of the window that each row takes up
+    gridh_size: Vec<(u16, u16)>,
+    /// The width of the window's grid
+    gridw: u16,
+    /// The percentage of the window that each column takes up
+    gridw_size: Vec<(u16, u16)>,
     /// The stdout to which all the widgets are printed.
     stdout: std::io::Stdout,
     /// The [`themes::Theme`] that the window uses.
@@ -331,13 +339,29 @@ impl<'a> Window<'a> {
 impl<'a> Buildable for Window<'a> {
 
     fn build(self) -> Window<'a> {
-        Window { children: self.children, stdout: self.stdout, theme_: self.theme_ }
+        Window {
+            children: self.children,
+            gridh: self.gridh,
+            gridh_size: self.gridh_size,
+            gridw: self.gridw,
+            gridw_size: self.gridw_size,
+            stdout: self.stdout,
+            theme_: self.theme_
+        }
     }
 
     fn builder() -> Window<'a> {
         enable_raw_mode().unwrap();
         execute!(stdout(), EnterAlternateScreen).unwrap();
-        Window { children: Vec::new(), stdout: stdout(), theme_: themes::default() }
+        Window {
+            children: Vec::new(),
+            gridh: 5,
+            gridh_size: vec![(0, 20), (1, 20), (2, 20), (3, 20), (4, 20)],
+            gridw: 5,
+            gridw_size: vec![(0, 20), (1, 20), (2, 20), (3, 20), (4, 20)],
+            stdout: stdout(),
+            theme_: themes::default()
+        }
     }
 
     fn new() -> Window<'a> {
@@ -350,5 +374,14 @@ impl<'a> Parent<'a> for Window<'a> {
         self.children.last_mut().unwrap().draw(x, y, 0, 0);
         execute!(self.stdout, cursor::MoveTo(1, 1)).unwrap();
         self.stdout.flush().unwrap();
+    }
+
+    fn grid(&mut self, child: Box<&'a mut dyn Widget>,
+        row: u16,
+        col: u16,
+        rowspan: u16,
+        colspan: u16) {
+
+        
     }
 }

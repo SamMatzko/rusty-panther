@@ -17,12 +17,25 @@ pub trait Buildable {
 /// The trait for any widgets that are parents; that is, they contain child widgets.
 pub trait Parent<'a> {
 
-    /// Adds a child widget to this parent widget. Takes arguments specifying what
-    /// percetage of the window's width and height this widget should take up; these
-    /// percentages are NOT checked for validity. This means that it's possible to
-    /// have a widget that takes up 110% of the available space. May fix this in
-    /// the future.
+    /// Adds a child widget to this parent widget. Takes placement X and placement
+    /// Y arguments. Note that this doesn't affect widgets added by `grid()`,
+    /// and hence widgets added with `add()` don't get scaled by the resizing of
+    /// the terminal.
     fn add(&mut self, child: Box<&'a mut dyn Widget>, x: u16, y: u16);
+
+    /// Adds a child widget to this parent widget. Takes row, column, rowspan, and
+    /// columnspan arguments for where and how to place this widget.
+    fn grid(
+        &mut self, child: Box<&'a mut dyn Widget>,
+        row: u16,
+        col: u16,
+        rowspan: u16,
+        colspan: u16
+    );
+
+    /// Configures the number of rows that the window has, and (optionally) what
+    /// percentage of the window each row takes up.
+    fn grid_rowconfigure();
 }
 
 /// The trait for widget structs.

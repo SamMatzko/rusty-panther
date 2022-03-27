@@ -1,4 +1,5 @@
-//! The module that contains all the theme-related structs and functions.
+//! The module that contains all the widget structure-related structs. This includes
+//! row/column/grid configuration structs and theme structs.
 
 use crate::traits::Buildable;
 use crossterm::style::Color;
