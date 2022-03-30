@@ -270,14 +270,8 @@ pub struct Window<'a> {
     /// All the immediate children of this widget (e.g., excludes grandchildren, 
     /// great-grandchildren, etc.)
     children: Vec<Box<&'a mut dyn Widget>>,
-    /// The height of the window's grid
-    gridh: u16,
-    /// The percentage of the window that each row takes up
-    gridh_size: Vec<(u16, u16)>,
-    /// The width of the window's grid
-    gridw: u16,
-    /// The percentage of the window that each column takes up
-    gridw_size: Vec<(u16, u16)>,
+    /// The [`Grid`] that manages all of the widget-sizing calculations
+    grid: Grid,
     /// The stdout to which all the widgets are printed.
     stdout: std::io::Stdout,
     /// The [`Theme`] that the window uses.
@@ -341,10 +335,7 @@ impl<'a> Buildable for Window<'a> {
     fn build(self) -> Window<'a> {
         Window {
             children: self.children,
-            gridh: self.gridh,
-            gridh_size: self.gridh_size,
-            gridw: self.gridw,
-            gridw_size: self.gridw_size,
+            grid: self.grid,
             stdout: self.stdout,
             theme_: self.theme_
         }
@@ -355,10 +346,7 @@ impl<'a> Buildable for Window<'a> {
         execute!(stdout(), EnterAlternateScreen).unwrap();
         Window {
             children: Vec::new(),
-            gridh: 5,
-            gridh_size: vec![(0, 20), (1, 20), (2, 20), (3, 20), (4, 20)],
-            gridw: 5,
-            gridw_size: vec![(0, 20), (1, 20), (2, 20), (3, 20), (4, 20)],
+            grid: Grid::new(),
             stdout: stdout(),
             theme_: default_theme()
         }
@@ -380,8 +368,5 @@ impl<'a> Parent<'a> for Window<'a> {
         row: u16,
         col: u16,
         rowspan: u16,
-        colspan: u16) {
-
-        
-    }
+        colspan: u16) {}
 }
