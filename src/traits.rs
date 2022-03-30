@@ -32,10 +32,6 @@ pub trait Parent<'a> {
         rowspan: u16,
         colspan: u16
     );
-
-    /// Configures the number of rows that the window has, and (optionally) what
-    /// percentage of the window each row takes up.
-    fn grid_rowconfigure();
 }
 
 /// The trait for widget structs.

@@ -1,7 +1,7 @@
 //! The module that contains all the widgets used in creating GUIs.
 
 use crate::constants::chars;
-use crate::themes;
+use crate::structure::*;
 use crate::traits::*;
 
 use crossterm::{cursor, execute};
@@ -101,8 +101,8 @@ pub struct Label {
     stdout: std::io::Stdout,
     /// The text that the label contains
     text_: String,
-    /// The [`themes::Theme`] that this label uses for it's colors
-    theme_: themes::Theme,
+    /// The [`Theme`] that this label uses for it's colors
+    theme_: Theme,
     /// The width of the label, in chars
     width: u16,
 }
@@ -147,7 +147,7 @@ impl Label {
         self
     }
 
-    /// Sets the label's theme to `theme`, a [`themes::Theme`]. Use when building the label.
+    /// Sets the label's theme to `theme`, a [`Theme`]. Use when building the label.
     /// 
     /// For example:
     /// 
@@ -156,7 +156,7 @@ impl Label {
     ///     .theme(themes::default())
     ///     .build();
     /// ```
-    pub fn set_theme(mut self, theme: themes::Theme) -> Label {
+    pub fn set_theme(mut self, theme: Theme) -> Label {
         self.theme_ = theme;
         self
     }
@@ -193,7 +193,7 @@ impl Buildable for Label {
             border_: (true, true),
             stdout: stdout(),
             text_: String::from(""),
-            theme_: themes::default(),
+            theme_: default_theme(),
             width: 10
         }
     }
@@ -280,8 +280,8 @@ pub struct Window<'a> {
     gridw_size: Vec<(u16, u16)>,
     /// The stdout to which all the widgets are printed.
     stdout: std::io::Stdout,
-    /// The [`themes::Theme`] that the window uses.
-    theme_: themes::Theme,
+    /// The [`Theme`] that the window uses.
+    theme_: Theme,
 }
 impl<'a> Window<'a> {
 
@@ -331,7 +331,7 @@ impl<'a> Window<'a> {
     ///     .theme(themes::default())
     ///     .build();
     /// ```
-    pub fn theme(mut self, theme: themes::Theme) -> Window<'a> {
+    pub fn theme(mut self, theme: Theme) -> Window<'a> {
         self.theme_ = theme;
         self
     }
@@ -360,7 +360,7 @@ impl<'a> Buildable for Window<'a> {
             gridw: 5,
             gridw_size: vec![(0, 20), (1, 20), (2, 20), (3, 20), (4, 20)],
             stdout: stdout(),
-            theme_: themes::default()
+            theme_: default_theme()
         }
     }
 

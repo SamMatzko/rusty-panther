@@ -3,13 +3,13 @@
 //! examples will appear here.
 
 pub mod constants;
-pub mod themes;
+pub mod structure;
 pub mod traits;
 pub mod widgets;
 
 /// The `prelude` module for `rusty_panther`; contains all the necessary traits.
 pub mod prelude {
-    pub use crate::themes;
+    pub use crate::structure::*;
     pub use crate::traits::*;
     pub use crate::widgets;
 }

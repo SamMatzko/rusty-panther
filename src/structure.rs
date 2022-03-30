@@ -20,14 +20,14 @@ pub struct Grid {
 impl Grid {
 
     /// Configure the size of a particular column, and set its priority to [`true`]
-    pub fn column_configure(&self, col: usize, percent: u8) {
+    pub fn column_configure(&mut self, col: usize, percent: u8) {
         self.columns[col] = GridColumn(percent, true);
         self.recalculate();
     }
 
     /// Recalculate the size of all the rows and columns based on which ones have
     /// user-set percentates.
-    pub fn recalculate(&self) {
+    pub fn recalculate(&mut self) {
 
         // First calculate the rows, giving prioritized rows the priority
 
@@ -50,7 +50,7 @@ impl Grid {
         // percent up between them
         let percent_for_rows = row_p / rows as u8;
         let mut i = 0;
-        for row in &self.rows {
+        for row in &self.rows.clone() {
             if !row.1 {
                 self.rows[i] = GridRow(percent_for_rows, false);
             }
@@ -78,7 +78,7 @@ impl Grid {
         // percent up between them
         let percent_for_columns = column_p / columns as u8;
         let mut i = 0;
-        for column in &self.columns {
+        for column in &self.columns.clone() {
             if !column.1 {
                 self.columns[i] = GridColumn(percent_for_columns, false);
             }
@@ -87,7 +87,7 @@ impl Grid {
     }
 
     /// Configure the size of a particular row, and set its priority to [`true`]
-    pub fn row_configure(&self, row: usize, percent: u8) {
+    pub fn row_configure(&mut self, row: usize, percent: u8) {
         self.rows[row] = GridRow(percent, true);
         self.recalculate();
     }
@@ -133,8 +133,8 @@ impl Buildable for Grid {
         let col = GridColumn(20, false);
         let row = GridRow(20, false);
         Grid {
-            columns: vec![col, col, col, col, col],
-            rows: vec![row, row, row, row, row],
+            columns: vec![col.copy(), col.copy(), col.copy(), col.copy(), col.copy()],
+            rows: vec![row.copy(), row.copy(), row.copy(), row.copy(), row.copy()],
             height_: 5,
             width_: 5,
         }
@@ -150,14 +150,28 @@ impl Buildable for Grid {
 /// The [`u8`] is the percentage of the grid's width that this column will take
 /// up. The [`bool`] tells whether this column's size should be given a priority
 /// or not.
+#[derive(Clone)]
 pub struct GridColumn(u8, bool);
+impl GridColumn {
+    /// Return a new [`GridColumn`] with the same configurations as this one
+    pub fn copy(&self) -> GridColumn {
+        GridColumn(self.0, self.1)
+    }
+}
 
 /// The struct for storing a grid row's data
 /// 
 /// The [`u8`] is the percentage of the grid's height that this row will take
 /// up. The [`bool`] tells whether this row's size should be given a priority
 /// or not.
+#[derive(Clone)]
 pub struct GridRow(u8, bool);
+impl GridRow {
+    /// Return a new [`GridRow`] with the same configurations as this one
+    pub fn copy(&self) -> GridRow {
+        GridRow(self.0, self.1)
+    }
+}
 
 /// The struct used for creating and setting widget themes.
 pub struct Theme {
@@ -207,6 +221,6 @@ impl Buildable for Theme {
 }
 
 /// Returns the default theme
-pub fn default() -> Theme {
+pub fn default_theme() -> Theme {
     Theme::new()
 }
