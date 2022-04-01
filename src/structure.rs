@@ -25,6 +25,18 @@ impl Grid {
         self.recalculate();
     }
 
+    /// Get the size of column `col` in characters, based on terminal character
+    /// width `width`.
+    pub fn get_column_chars(&self, col: u8, width: u16) -> u16 {
+        ((self.columns[col as usize].0 / 100) as u16 * width) as u16
+    }
+
+    /// Get the size of row `row` in characters, based on terminal character
+    /// height `height`.
+    pub fn get_row_chars(&self, row: u8, height: u16) -> u16 {
+        ((self.rows[row as usize].0 / 100) as u16 * height) as u16
+    }
+
     /// Recalculate the size of all the rows and columns based on which ones have
     /// user-set percentates.
     pub fn recalculate(&mut self) {

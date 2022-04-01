@@ -7,7 +7,7 @@ use crate::traits::*;
 use crossterm::{cursor, execute};
 use crossterm::event::*;
 use crossterm::style::{Color, Print, ResetColor, SetBackgroundColor, SetForegroundColor};
-use crossterm::terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen};
+use crossterm::terminal::*;
 
 use std::io::{stdout, Write};
 
@@ -272,12 +272,24 @@ pub struct Window<'a> {
     children: Vec<Box<&'a mut dyn Widget>>,
     /// The [`Grid`] that manages all of the widget-sizing calculations
     grid: Grid,
+    /// The height of the terminal screen
+    screen_height: u16,
+    /// The current width of the terminal screen
+    screen_width: u16,
     /// The stdout to which all the widgets are printed.
     stdout: std::io::Stdout,
     /// The [`Theme`] that the window uses.
     theme_: Theme,
 }
 impl<'a> Window<'a> {
+
+    /// Draws all the child widgets based on the terminal's width and height
+    pub fn draw_children(&self) {
+
+        // Loop through all the children, calculate the size and position of each
+        // child, and place it. Then, if it's a parent, call its `draw_children()`
+        // method.
+    }
 
     /// Quits the window and the alternate screen.
     pub fn quit(&mut self) {
@@ -301,7 +313,10 @@ impl<'a> Window<'a> {
                 },
                 Event::Key(_) => {},
                 Event::Mouse(_) => {}
-                Event::Resize(width, height) => println!("New size {}x{}", width, height),
+                Event::Resize(width, height) => {
+                    self.screen_height = height;
+                    self.screen_width = width;
+                }
             }
         }
     }
@@ -336,6 +351,8 @@ impl<'a> Buildable for Window<'a> {
         Window {
             children: self.children,
             grid: self.grid,
+            screen_height: self.screen_height,
+            screen_width: self.screen_width,
             stdout: self.stdout,
             theme_: self.theme_
         }
@@ -347,6 +364,8 @@ impl<'a> Buildable for Window<'a> {
         Window {
             children: Vec::new(),
             grid: Grid::new(),
+            screen_height: size().expect("screen size").1,
+            screen_width: size().expect("screen size").0,
             stdout: stdout(),
             theme_: default_theme()
         }

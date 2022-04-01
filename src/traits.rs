@@ -14,6 +14,11 @@ pub trait Buildable {
     fn new() -> Self;
 }
 
+/// The trait for all widgets that can have parents
+pub trait Child {
+    /// Get the 
+}
+
 /// The trait for any widgets that are parents; that is, they contain child widgets.
 pub trait Parent<'a> {
 
