@@ -105,6 +105,10 @@ pub struct Label {
     theme_: Theme,
     /// The width of the label, in chars
     width: u16,
+    /// The x position of this child, in either characters or grid units
+    x: u16,
+    /// The y position of this child, in either characters or grid units
+    y: u16,
 }
 impl Label {
     // The builder functions. These can be used to optionally customize options.
@@ -185,6 +189,8 @@ impl Buildable for Label {
             text_: self.text_,
             theme_: self.theme_,
             width: len,
+            x: self.x,
+            y: self.y,
         }
     }
 
@@ -194,7 +200,9 @@ impl Buildable for Label {
             stdout: stdout(),
             text_: String::from(""),
             theme_: default_theme(),
-            width: 10
+            width: 10,
+            x: 1,
+            y: 1,
         }
     }
 
@@ -387,5 +395,11 @@ impl<'a> Parent<'a> for Window<'a> {
         row: u16,
         col: u16,
         rowspan: u16,
-        colspan: u16) {}
+        colspan: u16) {
+        
+        // For each child widget, calculate its positioning and size
+        for child in &self.children {
+            println!("{:?}", self.grid.get_placement(1, 1));
+        }
+    }
 }

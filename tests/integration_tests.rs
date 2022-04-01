@@ -17,7 +17,7 @@ fn user_interaction() {
         .build();
     window.grid(Box::new(&mut label1), 1, 1, 1, 1);
     window.grid(Box::new(&mut label2), 2, 1, 1, 1);
-
+    
     // Run the app (uncomment if you want to have to hit Ctrl+C to continue testing)
     window.run();
 

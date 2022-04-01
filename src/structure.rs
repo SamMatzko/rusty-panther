@@ -4,6 +4,23 @@
 use crate::traits::Buildable;
 use crossterm::style::Color;
 
+#[cfg(test)]
+/// The module containing tests for these structs
+mod test {
+    
+    use super::*;
+
+    #[test]
+    /// Test the [`Grid`] struct
+    fn test_grid() {
+
+        // Create the default grid for testing
+        let mut grid = Grid::new();
+        
+        assert_eq!(grid.get_placement(1, 1), (1, 1));
+    }
+}
+
 /// This struct contains sizing data used in gridding widgets, including how many
 /// rows/columns a parent widget has, and how much of the grid those rows/columns
 /// take up.
@@ -29,6 +46,19 @@ impl Grid {
     /// width `width`.
     pub fn get_column_chars(&self, col: u8, width: u16) -> u16 {
         ((self.columns[col as usize].0 / 100) as u16 * width) as u16
+    }
+
+    /// Get the placement in chars of the character in the top left corner
+    /// of row index `row` and column index `col`
+    pub fn get_placement(&self, row: u16, col: u16) -> (u16, u16) {
+        
+        let mut from_left: u16 = 0;
+        let mut from_top: u16 = 0;
+
+        for row in self.rows.clone() { from_top += row.0 as u16; }
+        for col in self.columns.clone() { from_left += col.0 as u16; }
+        
+        (from_left, from_top)
     }
 
     /// Get the size of row `row` in characters, based on terminal character

@@ -16,7 +16,11 @@ pub trait Buildable {
 
 /// The trait for all widgets that can have parents
 pub trait Child {
-    /// Get the 
+   /// Get the `x` postition of the child, either in characters or in grid units
+   fn get_x() -> u16;
+
+   /// Get the `y` position of the child, either in characters or in grid units
+   fn get_y() -> u16;
 }
 
 /// The trait for any widgets that are parents; that is, they contain child widgets.
