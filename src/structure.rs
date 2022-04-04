@@ -17,7 +17,9 @@ mod test {
         // Create the default grid for testing
         let mut grid = Grid::new();
         
-        assert_eq!(grid.get_placement(1, 1), (1, 1));
+        assert_eq!(grid.get_placement(1, 2), (1, 21));
+        assert_eq!(grid.get_placement(2, 3), (21, 41));
+        assert_eq!(grid.get_placement(4, 3), (61, 41));
     }
 }
 
@@ -52,13 +54,23 @@ impl Grid {
     /// of row index `row` and column index `col`
     pub fn get_placement(&self, row: u16, col: u16) -> (u16, u16) {
         
-        let mut from_left: u16 = 0;
-        let mut from_top: u16 = 0;
+        let mut from_left: u16 = 1;
+        let mut from_top: u16 = 1;
 
-        for row in self.rows.clone() { from_top += row.0 as u16; }
-        for col in self.columns.clone() { from_left += col.0 as u16; }
+        for mut r in 1..=row {
+            if r > 1 {
+                let gridrow = &self.rows[r as usize];
+                from_top += gridrow.0 as u16;
+            }
+        }
+        for mut c in 1..=col {
+            if c > 1 {
+                let gridcol = &self.columns[c as usize];
+                from_left += gridcol.0 as u16;
+            }
+        }
         
-        (from_left, from_top)
+        (from_top, from_left)
     }
 
     /// Get the size of row `row` in characters, based on terminal character
