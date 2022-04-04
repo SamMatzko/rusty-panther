@@ -257,6 +257,10 @@ impl Widget for Label {
             ResetColor
         ).unwrap();
     }
+    fn get_x(&self) -> u16 { self.x }
+    fn get_y(&self) -> u16 { self.y }
+    fn set_x(&mut self, x: u16) { self.x = x; }
+    fn set_y(&mut self, y: u16) { self.y = y; }
 }
 
 /// The main window for the terminal application; this contains all the widgets.
@@ -396,6 +400,11 @@ impl<'a> Parent<'a> for Window<'a> {
         col: u16,
         rowspan: u16,
         colspan: u16) {
+
+        // Set this new child's row and column
+        child.set_x(col);
+        child.set_y(row);
+        self.children.push(child);
         
         // For each child widget, calculate its positioning and size
         for child in &self.children {

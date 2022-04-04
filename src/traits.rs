@@ -14,15 +14,6 @@ pub trait Buildable {
     fn new() -> Self;
 }
 
-/// The trait for all widgets that can have parents
-pub trait Child {
-   /// Get the `x` postition of the child, either in characters or in grid units
-   fn get_x() -> u16;
-
-   /// Get the `y` position of the child, either in characters or in grid units
-   fn get_y() -> u16;
-}
-
 /// The trait for any widgets that are parents; that is, they contain child widgets.
 pub trait Parent<'a> {
 
@@ -49,4 +40,16 @@ pub trait Widget {
     /// Draws the widget, with parameters location (`x`, `y`) and size `width`×`height`.
     /// This function is called by the parent widgets.
     fn draw(&mut self, x: u16, y: u16, width: u16, height: u16);
+
+    /// Get the `x` postition of the child, either in characters or in grid units
+    fn get_x(&self) -> u16;
+
+    /// Get the `y` position of the child, either in characters or in grid units
+    fn get_y(&self) -> u16;
+
+    /// Set the `x` position of the child, either in characters or in grid units
+    fn set_x(&mut self, x: u16);
+
+    /// Set the `y` position of the child, either in characters or in grid units
+    fn set_y(&mut self, y: u16);
 }
