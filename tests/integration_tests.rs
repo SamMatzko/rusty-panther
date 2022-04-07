@@ -9,17 +9,27 @@ fn user_interaction() {
     let mut window = Window::new();
 
     let mut label1 = Label::builder()
-        .border((false, false))
-        .text(String::from("This is text."))
+        // .border((false, false))
+        .text(String::from("Label 1"))
         .build();
     let mut label2 = Label::builder()
-        .text(String::from("This is text."))
+        .text(String::from("Label 2"))
+        .build();
+    let mut label3 = Label::builder()
+        .text(String::from("Label 3"))
+        .build();
+    let mut label4 = Label::builder()
+        .text(String::from("Label 4"))
         .build();
     window.grid(Box::new(&mut label1), 1, 1, 1, 1);
     window.grid(Box::new(&mut label2), 2, 1, 1, 1);
-    
+    window.grid(Box::new(&mut label3), 1, 2, 1, 1);
+    window.grid(Box::new(&mut label4), 3, 1, 1, 1);
+
     // Run the app (uncomment if you want to have to hit Ctrl+C to continue testing)
     window.run();
+
+    assert_eq!(1, 2);
 
     // This makes sure we don't mess up anything in the terminal while testing
     // window.quit();

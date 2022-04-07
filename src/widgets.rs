@@ -328,9 +328,17 @@ impl<'a> Window<'a> {
                 Event::Resize(width, height) => {
                     self.screen_height = height;
                     self.screen_width = width;
+                    self.update_grid_size();
                 }
             }
         }
+    }
+
+    /// Updates the grid size based on the terminal size.
+    fn update_grid_size(&mut self) {
+        let (width, height) = size().expect("size()");
+        self.grid.set_height_chars(height);
+        self.grid.set_width_chars(width);
     }
     
     // The builder functions. These can be used to optionally customize options.
@@ -401,14 +409,26 @@ impl<'a> Parent<'a> for Window<'a> {
         rowspan: u16,
         colspan: u16) {
 
+        // Update the grid's size
+        self.update_grid_size();
+
         // Set this new child's row and column
         child.set_x(col);
         child.set_y(row);
         self.children.push(child);
         
         // For each child widget, calculate its positioning and size
-        for child in &self.children {
-            println!("{:?}", self.grid.get_placement(1, 1));
+        for child in &mut self.children {
+            
+            // Get the placement and size of the child
+            let (x, y) = self.grid.get_placement_chars(child.get_x() as u8, child.get_y() as u8);
+            let width = self.grid.get_column_chars(child.get_x() as u8);
+            let height = self.grid.get_row_chars(child.get_y() as u8);
+            println!("x×y {}×{}", x, y);
+            println!("wxh {}x{}", size().unwrap().0, size().unwrap().1);
+
+            // Place the child
+            child.draw(x, y, width, height);
         }
     }
 }
