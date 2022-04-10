@@ -212,7 +212,7 @@ impl Buildable for Label {
 }
 impl Widget for Label {
 
-    fn draw(&mut self, x: u16, y: u16, _width: u16, _height: u16) {
+    fn draw(&mut self, x: u16, y: u16, width: u16, height: u16) {
 
         // The positioning of the text
         let mut text_x: u16 = x;
@@ -230,8 +230,8 @@ impl Widget for Label {
             create_border_box(
                 x,
                 y,
-                self.width + 1,
-                3,
+                width + 1,
+                height,
                 self.theme_.get_fg_rgb(),
                 self.theme_.get_bg_rgb()
             );
@@ -242,8 +242,8 @@ impl Widget for Label {
             create_fill_box(
                 x,
                 y,
-                self.width,
-                1,
+                width,
+                height,
                 self.theme_.get_bg_rgb()
             );
         }
@@ -296,11 +296,27 @@ pub struct Window<'a> {
 impl<'a> Window<'a> {
 
     /// Draws all the child widgets based on the terminal's width and height
-    pub fn draw_children(&self) {
+    pub fn draw_children(&mut self) {
 
-        // Loop through all the children, calculate the size and position of each
-        // child, and place it. Then, if it's a parent, call its `draw_children()`
-        // method.
+        // Clear the screen
+        execute!(self.stdout, Clear(ClearType::All));
+
+        // Update the grid's size
+        self.update_grid_size();
+
+        // For each child widget, calculate its positioning and size
+        for child in &mut self.children {
+            
+            // Get the placement and size of the child
+            let (x, y) = self.grid.get_placement_chars(child.get_x() as u8, child.get_y() as u8);
+            let width = self.grid.get_column_chars(child.get_x() as u8);
+            let height = self.grid.get_row_chars(child.get_y() as u8);
+            println!("x×y {}×{}", x, y);
+            println!("wxh {}x{}", size().unwrap().0, size().unwrap().1);
+
+            // Place the child
+            child.draw(x, y, width, height);
+        }
     }
 
     /// Quits the window and the alternate screen.
@@ -328,7 +344,7 @@ impl<'a> Window<'a> {
                 Event::Resize(width, height) => {
                     self.screen_height = height;
                     self.screen_width = width;
-                    self.update_grid_size();
+                    self.draw_children();
                 }
             }
         }
@@ -409,26 +425,12 @@ impl<'a> Parent<'a> for Window<'a> {
         rowspan: u16,
         colspan: u16) {
 
-        // Update the grid's size
-        self.update_grid_size();
-
         // Set this new child's row and column
         child.set_x(col);
         child.set_y(row);
         self.children.push(child);
         
-        // For each child widget, calculate its positioning and size
-        for child in &mut self.children {
-            
-            // Get the placement and size of the child
-            let (x, y) = self.grid.get_placement_chars(child.get_x() as u8, child.get_y() as u8);
-            let width = self.grid.get_column_chars(child.get_x() as u8);
-            let height = self.grid.get_row_chars(child.get_y() as u8);
-            println!("x×y {}×{}", x, y);
-            println!("wxh {}x{}", size().unwrap().0, size().unwrap().1);
-
-            // Place the child
-            child.draw(x, y, width, height);
-        }
+        // Redraw the children
+        self.draw_children();
     }
 }
