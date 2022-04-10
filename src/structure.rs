@@ -5,24 +5,17 @@ use crate::traits::Buildable;
 use crossterm::style::Color;
 use crossterm::terminal::size;
 
-/// Basically return's 1 if a float is less than 1.
-/// 
-/// ♫ Woody's `round_up()`, ♫ come on, it's time to play! ♫ ♪
-fn round_up(f: f32) -> u16 {
-    // f as u16 + 1
-    if f < 1.0 { 1 }
-    else { f as u16 }
-}
-
 #[cfg(test)]
 /// The module containing tests for these structs
 mod test {
     
     use super::*;
 
+    /* Tests for the `Grid` struct */
+
     #[test]
-    /// Test the [`Grid`] struct
-    fn test_grid() {
+    /// Test the [`Grid::get_placement_chars()`] method
+    fn test_get_placement_chars() {
 
         // Create the default grid for testing
         let mut grid = Grid::builder()
@@ -32,27 +25,60 @@ mod test {
         grid.set_width_chars(150);
         grid.set_height_chars(36);
         
-        assert_eq!(grid.get_placement(1, 2), (11, 1));
-        assert_eq!(grid.get_placement(2, 3), (21, 21));
-        assert_eq!(grid.get_placement(3, 4), (31, 41));
-        //                            |  |_____|  |
-        //                            |____￪______|
-        //                          Column ┘ Row ￪
-
-        assert_eq!(grid.get_placement_chars(1, 2), (1, 1));
-        assert_eq!(grid.get_placement_chars(2, 3), (41, 46));
-        assert_eq!(grid.get_placement_chars(3, 4), (51, 61));
-        //                                  |  |_____|  |
-        //                                  |____￪______|
-        //                                Column ┘ Row ￪
+        assert_eq!(grid.get_placement_chars(1, 2), (1, 7));
+        assert_eq!(grid.get_placement_chars(2, 3), (16, 14));
     }
 
     #[test]
-    /// Test the `round_up()` function
-    fn test_round_up() {
-        assert_eq!(round_up(0.01), 1);
-        assert_eq!(round_up(0.93), 1);
-        assert_eq!(round_up(1023.449), 1023);
+    /// Test the [`Grid::get_placement_percent()`] method
+    fn test_get_placement_percent() {
+
+        // Create the default grid for testing
+        let mut grid = Grid::builder()
+            .width(10)
+            .height(5)
+            .build();
+        grid.set_width_chars(150);
+        grid.set_height_chars(36);
+
+        assert_eq!(grid.get_placement_percent(1, 2), (1, 21));
+        assert_eq!(grid.get_placement_percent(2, 3), (11, 41));
+    }
+
+    #[test]
+    /// Test the [`Grid::percent_to_char_height()`] method
+    fn test_percent_to_char_height() {
+
+        // Create the default grid for testing
+        let mut grid = Grid::builder()
+            .width(10)
+            .height(5)
+            .build();
+        grid.set_width_chars(150);
+        grid.set_height_chars(36);
+
+        assert_eq!(grid.percent_to_char_height(100), 36);
+        assert_eq!(grid.percent_to_char_height(50), 18);
+        assert_eq!(grid.percent_to_char_height(25), 9);
+        assert_eq!(grid.percent_to_char_height(1), 1);
+    }
+
+    #[test]
+    /// Test the [`Grid::percent_to_char_width()`] method
+    fn test_percent_to_char_width() {
+
+        // Create the default grid for testing
+        let mut grid = Grid::builder()
+            .width(10)
+            .height(5)
+            .build();
+        grid.set_width_chars(150);
+        grid.set_height_chars(36);
+
+        assert_eq!(grid.percent_to_char_width(100), 150);
+        assert_eq!(grid.percent_to_char_width(50), 75);
+        assert_eq!(grid.percent_to_char_width(25), 37);
+        assert_eq!(grid.percent_to_char_width(1), 1);
     }
 }
 
@@ -79,61 +105,68 @@ impl Grid {
         self.recalculate();
     }
 
-    /// Get the size of column `col` in characters, based on the terminal's width
-    pub fn get_column_chars(&self, col: u8) -> u16 {
-        todo!("get_column_chars");
-        ((self.columns[col as usize].0 / 100) as u16 * self.width_chars) as u16
+    /// Return the size of column #`column` in characters
+    pub fn get_column_chars(&self, column: u8) -> u16 {
+        self.percent_to_char_width(self.columns[column as usize].0)
     }
 
-    /// Get the placement in % terminal size of the character in the top left
-    /// corner of row index `row` and column index `col`
-    pub fn get_placement(&self, row: u8, col: u8) -> (u8, u8) {
-        
-        let mut from_left: u8 = 1;
-        let mut from_top: u8 = 1;
+    /// Get the placement of the character at the top left of column `column` and
+    /// row `row`, in characters. Returns an `(x, y)` tuple.
+    pub fn get_placement_chars(&self, column: u8, row: u8) -> (u16, u16) {
 
+        // Get the placement percents for `column` and `row`
+        let (x, y) = self.get_placement_percent(column, row);
+
+        // Convert those to percents and return them
+        (self.percent_to_char_width(x), self.percent_to_char_height(y))
+    }
+
+    /// Get the placement of the character at the top left of column `column` and
+    /// row `row`, in percent of screen size. Returns an `(x, y)` tuple.
+    pub fn get_placement_percent(&self, column: u8, row: u8) -> (u8, u8) {
+
+        // Used for adding up the percent(s); returned as the final percents
+        let mut percent_x: u8 = 1;
+        let mut percent_y: u8 = 1;
+
+        // Loop through the columns until we reach the `column`th column, adding
+        // their percents to `percent_x` if they aren't the first column.
+        for c in 1..=column {
+            if c > 1 {
+                percent_x += &self.columns[c as usize].0;
+            }
+        }
+
+        // Loop through the rows until we reach the `row`th row, adding
+        // their percents to `percent_y` if they aren't the first row.
         for r in 1..=row {
             if r > 1 {
-                let gridrow = &self.rows[r as usize];
-                from_top += gridrow.0;
-            }
-        }
-        for c in 1..=col {
-            if c > 1 {
-                let gridcol = &self.columns[c as usize];
-                from_left += gridcol.0;
+                percent_y += &self.rows[r as usize].0;
             }
         }
         
-        (from_left, from_top)
+        (percent_x, percent_y)
     }
 
-    /// Get the placement in chars of the character in the top left corner of row
-    /// index `ro` and column index `col`.
-    pub fn get_placement_chars(&self, row: u8, col: u8) -> (u16, u16) {
-        let (x, y) = self.get_placement(row, col);
-        println!("y: {}", y);
-        let t = (self.percent_to_char_width(x), self.percent_to_char_height(y));
-        println!("t: {:?}", t);
-        t
-    }
-
-    /// Get the size of row `row` in characters, based on the terminal's height
+    /// Return the size of row #`row` in characters
     pub fn get_row_chars(&self, row: u8) -> u16 {
-        todo!("get_row_chars");
-        ((self.rows[row as usize].0 / 100) as u16 * self.height_chars) as u16
+        self.percent_to_char_height(self.rows[row as usize].0)
     }
 
-    /// Return the number of characters taking up `percent` percent of the
-    /// screen's height
+    /// Return the height in chars of `percent`% of the screen. Always rounds down
+    /// to the nearest integer, and is never < 1.
     pub fn percent_to_char_height(&self, percent: u8) -> u16 {
-        round_up(self.height_chars as f32 / 100f32) * percent as u16
+        let mut i = ((self.height_chars as f32 / 100f32) * percent as f32) as u16;
+        if i == 0 { i = 1; }
+        i
     }
 
-    /// Return the number of characters taking up `percent` percent of the
-    /// screen's width
+    /// Return the width in chars of `percent`% of the screen. Always rounds down
+    /// to the nearest integer, and is never < 1.
     pub fn percent_to_char_width(&self, percent: u8) -> u16 {
-        round_up(self.width_chars as f32 / 100f32) * percent as u16
+        let mut i = ((self.width_chars as f32 / 100f32) * percent as f32) as u16;
+        if i == 0 { i = 1; }
+        i
     }
 
     /// Recalculate the size of all the rows and columns based on which ones have
@@ -189,7 +222,6 @@ impl Grid {
         // percent up between them
         let percent_for_columns = column_p / columns as u8;
         let mut i = 0;
-        println!("percent_for_columns: {}", percent_for_columns);
         for column in &self.columns.clone() {
             if !column.1 {
                 self.columns[i] = GridColumn(percent_for_columns, false);
@@ -226,7 +258,6 @@ impl Grid {
         // Re-configure the list of rows based on the height given, calculating
         // the new row-size percent
         let percent: u8 = 100 / self.height_;
-        println!("Percent height(): {}", percent);
         self.rows = Vec::new();
         for _ in 0..self.height_ { self.rows.push(GridRow(percent, false)) }
         self
@@ -241,7 +272,6 @@ impl Grid {
         // Re-configure the list of columns based on the width given, calculating
         // the new column-size percent
         let percent: u8 = 100 / self.width_;
-        println!("Percent width(): {}", percent);
         self.columns = Vec::new();
         for _ in 0..self.width_ { self.columns.push(GridColumn(percent, false)) }
         self
