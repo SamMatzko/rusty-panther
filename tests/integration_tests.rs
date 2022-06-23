@@ -21,10 +21,17 @@ fn user_interaction() {
     let mut label4 = Label::builder()
         .text(String::from("Label 4"))
         .build();
+    let mut label5 = Label::builder()
+        .text(String::from("Label 5"))
+        .build();
+    let mut label6 = Label::builder()
+        .text(String::from("Label 6"))
+        .build();
     window.grid(Box::new(&mut label1), 1, 1, 1, 1);
     window.grid(Box::new(&mut label2), 2, 1, 1, 1);
     window.grid(Box::new(&mut label3), 1, 2, 1, 1);
-    window.grid(Box::new(&mut label4), 3, 1, 1, 1);
+    window.grid(Box::new(&mut label4), 1, 3, 1, 1);
+    window.grid(Box::new(&mut label5), 3, 1, 1, 1);
 
     // Run the app (uncomment if you want to have to hit Ctrl+C to continue testing)
     window.run();

@@ -14,6 +14,22 @@ mod test {
     /* Tests for the `Grid` struct */
 
     #[test]
+    /// Test the [`Grid::get_column_chars()`] method
+    fn test_get_column_chars() {
+
+        // Create the default grid for testing
+        let mut grid = Grid::builder()
+            .width(10)
+            .height(5)
+            .build();
+        grid.set_width_chars(150);
+        grid.set_height_chars(36);
+
+        assert_eq!(grid.get_column_chars(1), 14);
+        assert_eq!(grid.get_column_chars(2), 14);
+    }
+
+    #[test]
     /// Test the [`Grid::get_placement_chars()`] method
     fn test_get_placement_chars() {
 
@@ -27,6 +43,7 @@ mod test {
         
         assert_eq!(grid.get_placement_chars(1, 2), (1, 7));
         assert_eq!(grid.get_placement_chars(2, 3), (16, 14));
+        assert_eq!(grid.get_placement_chars(3, 4), (31, 21))
     }
 
     #[test]
@@ -43,6 +60,23 @@ mod test {
 
         assert_eq!(grid.get_placement_percent(1, 2), (1, 21));
         assert_eq!(grid.get_placement_percent(2, 3), (11, 41));
+    }
+
+    #[test]
+    /// Test the [`Grid::get_row_chars()`] method
+    fn test_get_row_chars() {
+
+        // Create the default grid for testing
+        let mut grid = Grid::builder()
+            .width(10)
+            .height(5)
+            .build();
+        grid.set_width_chars(150);
+        grid.set_height_chars(36);
+
+        assert_eq!(grid.get_row_chars(1), 6);
+        assert_eq!(grid.get_row_chars(2), 7);
+        assert_eq!(grid.get_row_chars(3), 7);
     }
 
     #[test]
@@ -92,9 +126,13 @@ pub struct Grid {
     pub columns: Vec<GridColumn>,
     /// A [`Vec<GridRow>`] containing all of this grid's rows
     pub rows: Vec<GridRow>,
+    /// The height of the grid, in rows
     height_: u8,
+    /// The height of the grid, in chars
     height_chars: u16,
+    /// The width of the grid, in rows
     width_: u8,
+    /// The width of the grid, in chars
     width_chars: u16,
 }
 impl Grid {
@@ -105,9 +143,18 @@ impl Grid {
         self.recalculate();
     }
 
-    /// Return the size of column #`column` in characters
+    /// Return the size of column `column` in characters
     pub fn get_column_chars(&self, column: u8) -> u16 {
-        self.percent_to_char_width(self.columns[column as usize].0)
+        let (x1, _) = self.get_placement_chars(column, 1);
+        if column < self.width_ {
+            println!("column: {}, column + 1: {}", column, column+1);
+            let (x2, _) = self.get_placement_chars(column+1, 0);
+            println!("x1: {}, x2: {}", x1, x2);
+            return x2 - x1 - 1
+        }
+        else {
+            return self.width_chars - x1 - 1
+        }
     }
 
     /// Get the placement of the character at the top left of column `column` and
@@ -148,9 +195,29 @@ impl Grid {
         (percent_x, percent_y)
     }
 
-    /// Return the size of row #`row` in characters
+    /// Return the size of row `row` in characters
     pub fn get_row_chars(&self, row: u8) -> u16 {
-        self.percent_to_char_height(self.rows[row as usize].0)
+        let (_, y1) = self.get_placement_chars(0, row);
+        if row < self.height_ {
+            println!("row: {}, row + 1: {}", row, row+1);
+            let (_, y2) = self.get_placement_chars(0, row+1);
+            println!("y1: {}, y2: {}", y1, y2);
+            return y2 - y1
+        }
+        else {
+            return self.height_chars - y1 - 1
+        }
+        /*
+        let (x1, _) = self.get_placement_chars(column, 1);
+        if column < self.width_ {
+            println!("column: {}, column + 1: {}", column, column+1);
+            let (x2, _) = self.get_placement_chars(column+1, 0);
+            println!("x1: {}, x2: {}", x1, x2);
+            return x2 - x1 - 1
+        }
+        else {
+            return self.width_chars - x1 - 1
+        */
     }
 
     /// Return the height in chars of `percent`% of the screen. Always rounds down
