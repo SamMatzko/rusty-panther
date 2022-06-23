@@ -75,7 +75,7 @@ fn create_fill_box(x: u16, y: u16, width: u16, height: u16, bg: Color) {
 /// 
 /// Example:
 /// 
-/// ```ignore
+/// ```
 /// use rusty_panther::prelude::*;
 /// use rusty_panther::widgets::*;
 /// 
@@ -88,8 +88,9 @@ fn create_fill_box(x: u16, y: u16, width: u16, height: u16, bg: Color) {
 ///     let mut label = Label::builder()
 ///         .text(String::from("This is text right here."))
 ///         .build();
-///     window.add(Box::new(&mut label), 1, 1);
-///     window.run();
+///     window.grid(Box::new(&mut label), 1, 1, 1, 1);
+///     // window.run();
+///     # window.quit();
 /// }
 /// ```
 pub struct Label {
@@ -120,10 +121,15 @@ impl Label {
     /// 
     /// For example:
     /// 
-    /// ```ignore
+    /// ```
+    /// # use rusty_panther::prelude::*;
+    /// # use rusty_panther::widgets::*;
+    /// #
+    /// # fn main() {
     /// let label = Label::builder()
     ///     .border((true, false))
     ///     .build();
+    /// # }
     /// ```
     pub fn border(mut self, border: (bool, bool)) -> Label {
         self.border_ = border;
@@ -141,10 +147,15 @@ impl Label {
     /// 
     /// For example:
     /// 
-    /// ```ignore
+    /// ```
+    /// # use rusty_panther::prelude::*;
+    /// # use rusty_panther::widgets::*;
+    /// # 
+    /// # fn main() {
     /// let label = Label::builder()
     ///     .text(String::from("This is text."))
     ///     .build();
+    /// # }
     /// ```
     pub fn text(mut self, text: String) -> Label {
         self.text_ = text;
@@ -155,10 +166,15 @@ impl Label {
     /// 
     /// For example:
     /// 
-    /// ```ignore
+    /// ```
+    /// # use rusty_panther::prelude::*;
+    /// # use rusty_panther::widgets::*;
+    /// # 
+    /// # fn main() {
     /// let label = Label::builder()
     ///     .theme(themes::default())
     ///     .build();
+    /// # }
     /// ```
     pub fn set_theme(mut self, theme: Theme) -> Label {
         self.theme_ = theme;
@@ -169,10 +185,15 @@ impl Label {
     /// 
     /// For example:
     /// 
-    /// ```ignore
+    /// ```
+    /// # use rusty_panther::prelude::*;
+    /// # use rusty_panther::widgets::*;
+    /// # 
+    /// # fn main() {
     /// let label = Label::builder()
     ///     .width(3)
     ///     .build();
+    /// # }
     /// ```
     pub fn set_width(mut self, width: u16) -> Label {
         self.width = width;
@@ -268,14 +289,15 @@ impl Widget for Label {
 /// 
 /// Example:
 /// 
-/// ```ignore
+/// ```
 /// use rusty_panther::prelude::*;
 /// 
 /// fn main() {
 ///     
 ///     // The window
 ///     let mut window = widgets::Window:new();
-///     window.run();
+///     // window.run();
+/// # window.quit()
 /// }
 /// ```
 pub struct Window<'a> {
@@ -371,10 +393,15 @@ impl<'a> Window<'a> {
     /// 
     /// For example:
     /// 
-    /// ```ignore
+    /// ```
+    /// # use rusty_panther::prelude::*;
+    /// # use rusty_panther::widgets::*;
+    /// # 
+    /// # fn main() {
     /// let window = Window::builder()
     ///     .theme(themes::default())
     ///     .build();
+    /// # }
     /// ```
     pub fn theme(mut self, theme: Theme) -> Window<'a> {
         self.theme_ = theme;
