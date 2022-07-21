@@ -320,7 +320,7 @@ impl<'a> Window<'a> {
     pub fn draw_children(&mut self) {
 
         // Clear the screen
-        execute!(self.stdout, Clear(ClearType::All));
+        execute!(self.stdout, Clear(ClearType::All)).unwrap();
 
         // Update the grid's size
         self.update_grid_size();
@@ -449,8 +449,8 @@ impl<'a> Parent<'a> for Window<'a> {
     fn grid(&mut self, child: Box<&'a mut dyn Widget>,
         row: u16,
         col: u16,
-        rowspan: u16,
-        colspan: u16) {
+        _rowspan: u16,
+        _colspan: u16) {
 
         // Set this new child's row and column
         child.set_x(col);
