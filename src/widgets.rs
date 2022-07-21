@@ -172,7 +172,7 @@ impl Label {
     /// # 
     /// # fn main() {
     /// let label = Label::builder()
-    ///     .theme(themes::default())
+    ///     .set_theme(default_theme())
     ///     .build();
     /// # }
     /// ```
@@ -191,7 +191,7 @@ impl Label {
     /// # 
     /// # fn main() {
     /// let label = Label::builder()
-    ///     .width(3)
+    ///     .set_width(3)
     ///     .build();
     /// # }
     /// ```
@@ -285,7 +285,6 @@ impl Widget for Label {
 }
 
 /// The main window for the terminal application; this contains all the widgets.
-/// Usage examples will appear here as soon as a semi-stable release comes out.
 /// 
 /// Example:
 /// 
@@ -295,7 +294,7 @@ impl Widget for Label {
 /// fn main() {
 ///     
 ///     // The window
-///     let mut window = widgets::Window:new();
+///     let mut window = widgets::Window::new();
 ///     // window.run();
 /// # window.quit()
 /// }
@@ -398,9 +397,10 @@ impl<'a> Window<'a> {
     /// # use rusty_panther::widgets::*;
     /// # 
     /// # fn main() {
-    /// let window = Window::builder()
-    ///     .theme(themes::default())
+    /// let mut window = Window::builder()
+    ///     .theme(default_theme())
     ///     .build();
+    /// # window.quit();
     /// # }
     /// ```
     pub fn theme(mut self, theme: Theme) -> Window<'a> {
