@@ -35,8 +35,8 @@ fn user_interaction() {
     window.grid(Box::new(&mut label6), 3, 2, 1, 1);
 
     // Run the app (uncomment if you want to have to hit Ctrl+C to continue testing)
-    // window.run();
+    window.run();
 
     // This makes sure we don't mess up anything in the terminal while testing
-    window.quit();
+    // window.quit();
 }

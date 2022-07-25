@@ -1,5 +1,7 @@
 //! The crate that contains all the traits, for better organization and easier use.
 
+use crossterm::event::*;
+
 /// The trait for all structs that can be built using the builder pattern syntax.
 pub trait Buildable {
     
@@ -12,6 +14,27 @@ pub trait Buildable {
 
     /// Shorthand for `BuildableStruct::builder().build()`.
     fn new() -> Self;
+}
+
+/// This trait is for any widgets that can take events. It adds methods that are
+/// used to handle events sent to the widget by the main loop.
+pub trait Eventable {
+
+    /// Called with an event parameter to trigger a callback on the widget. Returns
+    /// [`false`] if there is no callback for this event.
+    fn event_send(self, event: Event) -> bool;
+}
+
+/// This trait is for any widgets that can take focus. Note that THIS IS REQUIRED
+/// for widgets that take keyboard input. It adds methods for adding and removing
+/// focus.
+pub trait Focusable {
+
+    /// Called when this widget is to have the focus
+    fn focus_add(self);
+
+    /// Called when this widget is to have its focus taken away
+    fn focus_remove(self);
 }
 
 /// The trait for any widgets that are parents; that is, they contain child widgets.

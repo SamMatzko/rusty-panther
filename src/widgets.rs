@@ -342,6 +342,7 @@ impl<'a> Window<'a> {
 
     /// Quits the window and the alternate screen.
     pub fn quit(&mut self) {
+        execute!(self.stdout, DisableMouseCapture).unwrap();
         execute!(self.stdout, LeaveAlternateScreen).unwrap();
         disable_raw_mode().unwrap();
     }
@@ -361,7 +362,11 @@ impl<'a> Window<'a> {
                     return;
                 },
                 Event::Key(_) => {},
-                Event::Mouse(_) => {}
+                Event::Mouse(event) => {
+                    // Left click
+                    if event.kind == MouseEventKind::Down(MouseButton::Left) {
+                    }
+                }
                 Event::Resize(width, height) => {
                     self.screen_height = height;
                     self.screen_width = width;
@@ -424,6 +429,7 @@ impl<'a> Buildable for Window<'a> {
     fn builder() -> Window<'a> {
         enable_raw_mode().unwrap();
         execute!(stdout(), EnterAlternateScreen).unwrap();
+        execute!(stdout(), EnableMouseCapture).unwrap();
         Window {
             children: Vec::new(),
             grid: Grid::new(),
